@@ -1,13 +1,14 @@
 from PyQt5.QtWidgets import (QApplication, QComboBox, QDialog,
-                             QDialogButtonBox, QFormLayout, QGridLayout, QGroupBox, QHBoxLayout,
-                             QLabel, QLineEdit, QMenu, QMenuBar, QPushButton, QSpinBox, QTextEdit,
-                             QVBoxLayout)
+                             QDialogButtonBox, QFormLayout, QGroupBox,
+                             QLabel, QVBoxLayout, QFileDialog)
+import pyperclip
 
 import sys
 
 from CreadorGenerico import CrearFixture
 from documentosCreador import crear_documento_fixture, crear_documento_comportamiento
 from escritorExcel import escribir
+from excelToPythonDict import ExcelToPythonDict
 from excel_by_arbol import ExcelByArbol
 
 
@@ -45,7 +46,11 @@ class Dialog(QDialog):
         if decision == 5:
             creador = ExcelByArbol()
             creador.crear_arbol()
-
+        if decision == 6:
+            creador = ExcelToPythonDict()
+            path = self.show_get_file_dialog()
+            data = creador.run(path[0])
+            pyperclip.copy(data)
         return True
 
     def create_form_group_box(self):
@@ -57,11 +62,18 @@ class Dialog(QDialog):
             'crear documento comportamiento',
             'crear fixture',
             'escribir',
-            'excel por arbol'
+            'excel por arbol',
+            'excel a diccionario de python'
         ])
         options.currentIndexChanged.connect(self.at_select)
         layout.addRow(QLabel("Selecciona una opcion:"), options)
         self.formGroupBox.setLayout(layout)
+
+    def show_get_file_dialog(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        file_name = QFileDialog.getOpenFileName(self, "Seleccione el Directorio", options=options)
+        return file_name
 
     def at_select(self, i):
         self.decision = i + 1
